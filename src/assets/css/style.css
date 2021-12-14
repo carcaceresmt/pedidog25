@@ -1,0 +1,8 @@
+.forms{
+    position: absolute;
+    top:48%;
+    left:50%;
+    width: 50%;
+    transform: translate(-50%,-50%);
+    border-radius: 0 20px 0 20px;
+}
