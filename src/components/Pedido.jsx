@@ -11,9 +11,9 @@ const Pedido = () => {
 
     /**Estados */
     const [data, setData] = useState([])
-    const [cantidad, setCantidad] = useState(1)
+    const [cantidad, setCantidad] = useState(0)
     const [pedido, setPedido] = useState([])
-
+    const [total,setTotal] = useState(0)
     /**
      * funciones
      */
@@ -30,39 +30,70 @@ const Pedido = () => {
         else {
 
             const array = pedido
+            if (validar(producto, array) === 0) {
 
+                const objetoProducto = {
+                    id: producto.id,
+                    nomprod: producto.nomprod,
+                    precio: producto.precio,
+                    cantidad: cantidad,
+                    descripcion: producto.descripcion,
+                    subtotal: cantidad * producto.precio
+                }
 
-            const objetoProducto = {
-                id: producto.id,
-                nomprod: producto.nomprod,
-                precio: producto.precio,
-                cantidad: cantidad,
-                descripcion: producto.descripcion,
-                subtotal: cantidad * producto.precio
+                array.push(objetoProducto)
+                localStorage.setItem("carrito", JSON.stringify(array))
+                setPedido(JSON.parse(localStorage.getItem("carrito")))
+                calculoTotal(array)
             }
-
-            array.push(objetoProducto)
-            localStorage.setItem("carrito", JSON.stringify(array))
-            setPedido(JSON.parse(localStorage.getItem("carrito")))
+            else{
+                alert("Producto se Encuentra Agregado")
+            }
         }
 
     }
 
-    const validar = (producto,array)=>{
+    const validar = (producto, array) => {
 
         let cont = 0
         array.forEach(element => {
-            
-            if(producto.id=== element.id){
+
+            if (producto.id === element.id) {
                 cont++
             }
 
-        });
+        })
 
         return cont
     }
 
 
+    const calculoTotal = (array )=>{
+
+        let totalpagar=0
+        array.forEach(element=>{
+            totalpagar=totalpagar+element.subtotal
+        })
+        setTotal(totalpagar)  
+        localStorage.setItem("total",totalpagar)     
+
+    }
+
+    const remover=(index)=>{
+
+        let array= pedido
+        if(index>0){
+            array.splice(index,1)
+        }
+        else{
+            array.pop()
+        }
+
+        localStorage.setItem("carrito",JSON.stringify(array))
+        setPedido(JSON.parse(localStorage.getItem("carrito")))
+        calculoTotal(array)      
+
+    }
 
 
 
@@ -74,6 +105,7 @@ const Pedido = () => {
 
         resp.then(data => {
             setData(data.data)
+           
         })
 
         if (localStorage.getItem("carrito") != null) {
@@ -129,7 +161,7 @@ const Pedido = () => {
                                 <td>{producto.descripcion}</td>
                                 <td><button className="btn btn-success" onClick={(e) => { agregar(producto) }}>
                                     Agregar
-                                    </button>
+                                </button>
                                 </td>
                             </tr>
 
@@ -165,11 +197,14 @@ const Pedido = () => {
                         <th>
                             Subtotal
                         </th>
+                        <th>
+                           Acción
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {
-                        pedido.map((item,index)=>
+                        pedido.map((item, index) =>
 
                             <tr key={item.id}>
                                 <td>{item.id}</td>
@@ -178,6 +213,7 @@ const Pedido = () => {
                                 <td>{item.cantidad}</td>
                                 <td>{item.descripcion}</td>
                                 <td>{"$ "}{new Intl.NumberFormat("de-DE").format(parseInt(item.subtotal))}</td>
+                                <td><button className="btn btn-danger" onClick={(e)=>{remover(index)}}>Remover(-)</button></td>
                             </tr>
                         )
 
@@ -185,7 +221,8 @@ const Pedido = () => {
                 </tbody>
 
             </table>
-
+            <hr className="mt-5"/>
+            <h1 className="text-right">Total a Pagar {new Intl.NumberFormat("de-DE").format(parseInt(total))}</h1>        
 
         </div>
     )
